@@ -5,24 +5,27 @@
 ### Install Executtor
 
 ```bash
-$ go get github.com/drgomesp/executtor`
-```
-
-### Import Executtor
-
-```go
-import x "github.com/drgomesp/execcutor"
+go get github.com/drgomesp/executtor
 ```
 
 ### Basic Example
 
 ```go
+package main
+
+import (
+	"context"
+	"log"
+
+	x "github.com/drgomesp/execcutor"
+)
+
 func main() {
-    // Run returns an error which you can capture and handle
-    _ = x.Run(func(ctx context.Context, args ...string) error {
-        // your code goes here
-        return nil
-    })
+	// Run returns an error which you can capture and handle
+	_ = x.Run(func(ctx context.Context, args ...string) error {
+		// and the program runs here  
+		return nil
+	})
 }
 ```
 

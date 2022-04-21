@@ -23,7 +23,9 @@ func Run(entrypoint Entrypoint) error {
 
 	go handleSignals(sig)
 
-	return entrypoint(ctx, os.Args[1:]...)
+	return func() error {
+		return entrypoint(ctx, os.Args...)
+	}()
 }
 
 func handleSignals(sig chan os.Signal) {
