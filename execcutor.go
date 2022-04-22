@@ -14,29 +14,33 @@ const (
 	StatusError
 )
 
-type Entrypoint func(ctx context.Context, args ...string) error
+type RunFunc func(ctx context.Context, args []string) error
+type ShutdownFunc func(ctx context.Context) error
 
 // Run an entrypoint function that consumes os.Args
-func Run(entrypoint Entrypoint) error {
+func Run(entrypoint RunFunc, shutdownFunc ShutdownFunc) {
 	ctx := context.Background()
 	sig := make(chan os.Signal, 1)
 
-	go handleSignals(sig)
+	go handleSignals(ctx, sig, shutdownFunc)
 
-	return func() error {
-		return entrypoint(ctx, os.Args...)
-	}()
+	if err := entrypoint(ctx, os.Args); err != nil {
+		os.Exit(StatusError)
+	}
+
+	os.Exit(StatusSuccess)
 }
 
-func handleSignals(sig chan os.Signal) {
-	func() {
-		signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
-		defer signal.Stop(sig)
+func handleSignals(ctx context.Context, sig chan os.Signal, shutdownFunc ShutdownFunc) {
+	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
+	defer signal.Stop(sig)
 
-		<-sig
-		log.Println("attempting graceful shutdown...")
+	<-sig
+	log.Println("attempting graceful shutdown...")
+	if err := shutdownFunc(ctx); err != nil {
+		log.Println(err)
+		os.Exit(StatusError)
+	}
 
-		// ...
-		os.Exit(StatusUnknown)
-	}()
+	os.Exit(StatusUnknown)
 }

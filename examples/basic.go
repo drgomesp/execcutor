@@ -9,9 +9,11 @@ import (
 
 func main() {
 	// Run returns an error which you can capture and handle
-	_ = x.Run(func(ctx context.Context, args ...string) error {
-		log.Println("and the program runs here...")
-
+	x.Run(func(ctx context.Context, args []string) error {
+		log.Println("my code here")
+		return nil
+	}, func(ctx context.Context) error {
+		log.Println("shutdown")
 		return nil
 	})
 }
